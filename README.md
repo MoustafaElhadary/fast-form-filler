@@ -4,6 +4,11 @@ Instantly Fill Forms with Realistic Data for Seamless Testing
 
 Are you tired of wasting precious time and mental energy coming up with random data when testing forms? Say goodbye to that hassle with Fake Data Generator - your go-to Chrome extension for lightning-fast form filling!
 
+
+## Download
+
+[Download Fast Form Filler from the Chrome Web Store](https://chromewebstore.google.com/detail/fast-form-filler/fodkgenpkjgddegddggkboogdnmjcdgj?authuser=0&hl=en)
+
 ## 🚀 Boost Your Productivity
 
 Transform your testing process from tedious to effortless. With just a simple keyboard shortcut, generate high-quality fake data in seconds.
@@ -40,9 +45,7 @@ Transform your testing process from tedious to effortless. With just a simple ke
 
 Crafted with care for professionals but simple enough for anyone to use. Streamline your workflow and say goodbye to "John Doe" and "test@test.com" forever!
 
-## Download
-
-[Download Fast Form Filler from the Chrome Web Store](https://chromewebstore.google.com/detail/fast-form-filler/fodkgenpkjgddegddggkboogdnmjcdgj?authuser=0&hl=en)
+# If you want to run locally
 
 ## Setup
 
@@ -51,8 +54,6 @@ Add a `.env` file with the following content:
 ```env
 INLINE_RUNTIME_CHUNK=false
 ```
-
-
 
 # Getting Started
 
