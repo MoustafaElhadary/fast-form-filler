@@ -2,10 +2,6 @@ import { faker } from "@faker-js/faker"
 import type { PlasmoCSConfig, PlasmoGetOverlayAnchor } from "plasmo"
 import React, { useEffect, useRef, useState } from "react"
 
-import { Storage } from "@plasmohq/storage"
-
-const storage = new Storage()
-
 export const config: PlasmoCSConfig = {
   matches: ["<all_urls>"],
   all_frames: true
@@ -46,16 +42,7 @@ const FakeDataMenu: React.FC = () => {
   const [selectedOptionIndex, setSelectedOptionIndex] = useState(0)
   const menuRef = useRef<HTMLDivElement>(null)
   const activeInputRef = useRef<HTMLInputElement | null>(null)
-  const [keyCombo, setKeyCombo] = useState<string | null>(null)
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 })
-
-  useEffect(() => {
-    const loadKeyCombo = async () => {
-      const savedCombo = await storage.get("keyCombo")
-      setKeyCombo(savedCombo || null)
-    }
-    loadKeyCombo()
-  }, [])
 
   useEffect(() => {
     const handleFocus = (e: FocusEvent) => {
@@ -65,10 +52,9 @@ const FakeDataMenu: React.FC = () => {
     }
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      const isDefaultCombo = (e.ctrlKey || e.metaKey) && e.key === "k"
-      const isCustomCombo = keyCombo && matchesKeyCombo(e, keyCombo)
+      const isCombo = (e.ctrlKey || e.metaKey) && e.key === "k"
 
-      if (isDefaultCombo || isCustomCombo) {
+      if (isCombo) {
         e.preventDefault()
         showMenu()
       } else if (isVisible) {
@@ -76,29 +62,21 @@ const FakeDataMenu: React.FC = () => {
       }
     }
 
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsVisible(false)
+      }
+    }
+
     document.addEventListener("keydown", handleKeyDown)
     document.addEventListener("focusin", handleFocus)
+    document.addEventListener("mousedown", handleClickOutside)
     return () => {
       document.removeEventListener("keydown", handleKeyDown)
       document.removeEventListener("focusin", handleFocus)
+      document.removeEventListener("mousedown", handleClickOutside)
     }
-  }, [isVisible, selectedCategory, selectedOptionIndex, keyCombo])
-
-  const matchesKeyCombo = (e: KeyboardEvent, combo: string): boolean => {
-    const parts = combo
-      .toLowerCase()
-      .split("+")
-      .map((part) => part.trim())
-    const pressedKeys = new Set<string>()
-
-    if (e.ctrlKey) pressedKeys.add("ctrl")
-    if (e.metaKey) pressedKeys.add("cmd")
-    if (e.altKey) pressedKeys.add("alt")
-    if (e.shiftKey) pressedKeys.add("shift")
-    pressedKeys.add(e.key.toLowerCase())
-
-    return parts.every((part) => pressedKeys.has(part))
-  }
+  }, [isVisible, selectedCategory, selectedOptionIndex])
 
   const showMenu = () => {
     if (activeInputRef.current) {
@@ -182,23 +160,16 @@ const FakeDataMenu: React.FC = () => {
         data +
         currentValue.slice(cursorPosition)
 
-      // Use the setNativeValue function to update the input
       setNativeValue(input, newValue)
 
-      // Set the cursor position
       const newCursorPosition =
         cursorPosition + (needsSpace ? 1 : 0) + data.length
       input.setSelectionRange(newCursorPosition, newCursorPosition)
 
-      // Focus the input
       input.focus()
     }
 
-    setTimeout(() => {
-      if (menuRef.current) {
-        menuRef.current.focus()
-      }
-    }, 0)
+    setIsVisible(false)
   }
 
   if (!isVisible) return null
@@ -211,11 +182,6 @@ const FakeDataMenu: React.FC = () => {
         ...styles.menu,
         top: `${menuPosition.top}px`,
         left: `${menuPosition.left}px`
-      }}
-      onBlur={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-          setIsVisible(false)
-        }
       }}>
       <div style={styles.tabs}>
         {CATEGORIES.map((category) => (
